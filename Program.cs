@@ -4,6 +4,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: myAllowSpecificOrigins,
+                      policy  =>
+                      {
+                          policy.WithOrigins("https://localhost:44479")
+                                .AllowAnyHeader()
+                                .AllowAnyMethod();
+                      });
+});
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<INonLinearSolverService, NonLinearSolverService>();
 
@@ -16,6 +29,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseCors(myAllowSpecificOrigins);
 // app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
