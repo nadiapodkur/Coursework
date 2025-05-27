@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Linq.Expressions;
 using CourseWork2.Models;
 using NCalc;
-using Expression = NCalc.Expression; // Додайте пакет NCalc або NCalcSync
+using Expression = NCalc.Expression;
 
 namespace CourseWork2.Services;
 
@@ -23,7 +23,6 @@ public class NonLinearSolverService: INonLinearSolverService
             return new SolutionResponse { ErrorMessage = "Кількість рівнянь, імен змінних та значень початкового наближення має співпадати." };
         }
         
-        // Встановлюємо культуру для узгодженого оброблення чисел в NCalc
         CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
         try
@@ -39,7 +38,6 @@ public class NonLinearSolverService: INonLinearSolverService
         }
         catch (Exception ex)
         {
-            // Логування помилки тут було б доречним
             Console.Error.WriteLine($"Помилка під час розв'язання: {ex}");
             return new SolutionResponse { ErrorMessage = $"Внутрішня помилка сервера: {ex.Message}" };
         }
@@ -59,16 +57,12 @@ public class NonLinearSolverService: INonLinearSolverService
         foreach (var eqStr in equationStrings)
         {
             var expr = new Expression(eqStr, ExpressionOptions.IgnoreCaseAtBuiltInFunctions);
-            // Перевірка на синтаксичні помилки під час створення виразу
             if (expr.HasErrors())
             {
                 return new SolutionResponse { ErrorMessage = $"Синтаксична помилка у рівнянні '{eqStr}': {expr.Error}" , SolverType = SolverMethodType.SimpleIteration.ToString()};
             }
             expressions.Add(expr);
         }
-        
-        // Тут можна додати логіку для історії ітерацій, якщо потрібно
-        // List<IterationStep> history = new List<IterationStep>();
 
         for (int iteration = 0; iteration < maxIter; iteration++)
         {
@@ -111,17 +105,15 @@ public class NonLinearSolverService: INonLinearSolverService
                 errorSum += Math.Pow(x_k_plus_1[j] - x_k[j], 2);
             }
             double error = Math.Sqrt(errorSum);
-            
-            // history.Add(new IterationStep { IterationNumber = iteration + 1, X_k = new List<double>(x_k_plus_1), Error = error });
 
             if (error < tol)
             {
-                return new SolutionResponse { Solution = x_k_plus_1, Iterations = iteration + 1, Converged = true, SolverType = SolverMethodType.SimpleIteration.ToString() /*, IterationHistory = history*/ };
+                return new SolutionResponse { Solution = x_k_plus_1, Iterations = iteration + 1, Converged = true, SolverType = SolverMethodType.SimpleIteration.ToString()};
             }
             x_k = new List<double>(x_k_plus_1);
         }
 
-        return new SolutionResponse { Solution = x_k, Iterations = maxIter, Converged = false, ErrorMessage = "Максимальну кількість ітерацій досягнуто без збіжності.", SolverType = SolverMethodType.SimpleIteration.ToString() /*, IterationHistory = history*/ };
+        return new SolutionResponse { Solution = x_k, Iterations = maxIter, Converged = false, ErrorMessage = "Максимальну кількість ітерацій досягнуто без збіжності.", SolverType = SolverMethodType.SimpleIteration.ToString()};
     }
 
     private SolutionResponse GaussSeidelMethod(
@@ -145,8 +137,6 @@ public class NonLinearSolverService: INonLinearSolverService
              expressions.Add(expr);
         }
 
-        // List<IterationStep> history = new List<IterationStep>();
-
         for (int iteration = 0; iteration < maxIter; iteration++)
         {
             List<double> x_previous_iter = new List<double>(x_current);
@@ -154,8 +144,6 @@ public class NonLinearSolverService: INonLinearSolverService
             for (int i = 0; i < n; i++)
             {
                 Expression currentExpression = expressions[i];
-                // Для Гауса-Зейделя, параметри оновлюються з поточного x_current,
-                // який вже містить оновлені значення для j < i.
                 for (int j = 0; j < n; j++)
                 {
                     currentExpression.Parameters[variableNames[j]] = x_current[j];
@@ -192,13 +180,11 @@ public class NonLinearSolverService: INonLinearSolverService
             }
             double error = Math.Sqrt(errorSum);
 
-            // history.Add(new IterationStep { IterationNumber = iteration + 1, X_k = new List<double>(x_current), Error = error });
-
             if (error < tol)
             {
-                return new SolutionResponse { Solution = x_current, Iterations = iteration + 1, Converged = true, SolverType = SolverMethodType.GaussSeidel.ToString() /*, IterationHistory = history*/ };
+                return new SolutionResponse { Solution = x_current, Iterations = iteration + 1, Converged = true, SolverType = SolverMethodType.GaussSeidel.ToString()};
             }
         }
-        return new SolutionResponse { Solution = x_current, Iterations = maxIter, Converged = false, ErrorMessage = "Максимальну кількість ітерацій досягнуто без збіжності.", SolverType = SolverMethodType.GaussSeidel.ToString() /*, IterationHistory = history*/ };
+        return new SolutionResponse { Solution = x_current, Iterations = maxIter, Converged = false, ErrorMessage = "Максимальну кількість ітерацій досягнуто без збіжності.", SolverType = SolverMethodType.GaussSeidel.ToString()};
     }
 }

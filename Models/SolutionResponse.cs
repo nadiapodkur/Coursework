@@ -7,6 +7,4 @@ public class SolutionResponse
     public int? Iterations { get; set; }
     public bool Converged { get; set; }
     public string? ErrorMessage { get; set; }
-    // Додатково: можна додати історію ітерацій, якщо потрібно
-    // public List<IterationStep> IterationHistory { get; set; }
 }

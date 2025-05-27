@@ -10,7 +10,6 @@ public class SolverController : ControllerBase
 {
     private readonly INonLinearSolverService _solverService;
 
-    // Використовуйте Dependency Injection для сервісу
     public SolverController(INonLinearSolverService solverService)
     {
         _solverService = solverService;
@@ -24,7 +23,6 @@ public class SolverController : ControllerBase
             return BadRequest(new SolutionResponse { ErrorMessage = "Запит не може бути порожнім." });
         }
 
-        // Проста валідація на рівні контролера (можна розширити за допомогою FluentValidation)
         if (request.EquationStrings == null || !request.EquationStrings.Any())
         {
             return BadRequest(new SolutionResponse { ErrorMessage = "Список рівнянь не може бути порожнім." });
@@ -55,8 +53,6 @@ public class SolverController : ControllerBase
 
         if (!string.IsNullOrEmpty(result.ErrorMessage) && result.Solution == null && !result.Converged)
         {
-            // Якщо є помилка, яка перешкодила навіть почати або завершити розв'язання
-            // Можна повернути BadRequest або інший відповідний код помилки
             return BadRequest(result);
         }
 
